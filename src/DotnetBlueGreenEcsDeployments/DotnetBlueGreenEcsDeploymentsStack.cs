@@ -1,6 +1,10 @@
 using Amazon.CDK;
 using Constructs;
 using Amazon.CDK.AWS.IAM;
+using ECR = Amazon.CDK.AWS.ECR;
+using CodeCommit = Amazon.CDK.AWS.CodeCommit;
+using Amazon.CDK.AWS.CodeBuild;
+using System.Collections.Generic;
 
 namespace DotnetBlueGreenEcsDeployments
 {
@@ -36,6 +40,40 @@ namespace DotnetBlueGreenEcsDeployments
             });
             
             codeBuildRole.AddToPolicy(policyStatement);
+            
+            var ecrRepo = new  ECR.Repository(this, "ecrRepo", new ECR.RepositoryProps {
+                ImageScanOnPush = true
+            });
+            
+            var codeRepo = new CodeCommit.Repository(this, "codeRepo", new CodeCommit.RepositoryProps {
+                RepositoryName = "nginx-sample"
+            });
+            
+            new Project(this, "codeBuild", new ProjectProps {
+                Role = codeBuildRole,
+                Description = "Code build project for the application",
+                Environment = new BuildEnvironment {
+                    BuildImage = LinuxBuildImage.STANDARD_5_0,
+                    ComputeType = ComputeType.SMALL,
+                    Privileged = true,
+                    EnvironmentVariables = new Dictionary<string, IBuildEnvironmentVariable> {
+                        { "REPOSITORY_URI", new BuildEnvironmentVariable {
+                                Value = ecrRepo.RepositoryUri,
+                                Type = BuildEnvironmentVariableType.PLAINTEXT,
+                            }
+                        },
+                        {  "TASK_EXECUTION_ARN", new BuildEnvironmentVariable {
+                                Value = ecsTaskRole.RoleArn,
+                                Type = BuildEnvironmentVariableType.PLAINTEXT,
+                            } 
+                        },
+                    }
+                },
+                Source = Source.CodeCommit(new CodeCommitSourceProps { 
+                    Repository = codeRepo,
+                    BranchOrRef = "main",
+                })
+            });
         }
     }
 }
