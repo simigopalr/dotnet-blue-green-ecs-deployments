@@ -75,7 +75,7 @@ namespace DotnetBlueGreenEcsDeployments
                 })
             });
             
-            //Will be using these outputs later as part of codepipeline
+            //Will be using these outputs later as part of ECS Blue Green stack
              new CfnOutput(this, "codeRepoName", new CfnOutputProps { 
                 Description = "CodeCommit repository name",
                 ExportName = "repositoryName",
