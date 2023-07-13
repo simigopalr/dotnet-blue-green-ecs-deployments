@@ -8,6 +8,7 @@ namespace DotnetBlueGreenEcsDeployments
         {
             var app = new App();
             new DotnetBlueGreenEcsDeploymentsStack(app, "DotnetBlueGreenEcsDeploymentsStack");
+            new DotnetContainerStack(app, "DotnetContainerStack");
 
             app.Synth();
         }
