@@ -6,7 +6,7 @@ using CodeCommit = Amazon.CDK.AWS.CodeCommit;
 using Amazon.CDK.AWS.CodeBuild;
 using System.Collections.Generic;
 
-namespace DotnetBlueGreenEcsDeployments
+namespace DotnetBlueGreenEcsDeployments.Stacks
 {
     public class DotnetContainerStack : Stack
     {

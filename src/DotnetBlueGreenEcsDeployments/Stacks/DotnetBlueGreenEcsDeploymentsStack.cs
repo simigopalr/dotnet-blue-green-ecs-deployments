@@ -10,8 +10,9 @@ using Amazon.CDK.Pipelines;
 using Amazon.CDK.AWS.S3;
 using System.Collections.Generic;
 using System;
+using DotnetBlueGreenEcsDeployments.Constructs;
 
-namespace DotnetBlueGreenEcsDeployments
+namespace DotnetBlueGreenEcsDeployments.Stacks
 {
     public class DotnetBlueGreenEcsDeploymentsStack : Stack
     {
@@ -89,6 +90,8 @@ namespace DotnetBlueGreenEcsDeployments
             
             artifactsBucket.AddToResourcePolicy(denyUnEncryptedObjectUploads);
             artifactsBucket.AddToResourcePolicy(denyInsecureConnections);
+            
+            var ecsBlueGreenService = new EcsBlueGreenServiceConstruct(this, "ecs-fargate-blue-green-service-construct");
             
         }
     }
