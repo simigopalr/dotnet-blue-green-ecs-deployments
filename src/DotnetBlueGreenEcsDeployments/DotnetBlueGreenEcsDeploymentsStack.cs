@@ -6,6 +6,10 @@ using Amazon.CDK.AWS.CodeBuild;
 using ECR = Amazon.CDK.AWS.ECR;
 using CodeCommit = Amazon.CDK.AWS.CodeCommit;
 using Amazon.CDK.AWS.IAM;
+using Amazon.CDK.Pipelines;
+using Amazon.CDK.AWS.S3;
+using System.Collections.Generic;
+using System;
 
 namespace DotnetBlueGreenEcsDeployments
 {
@@ -54,6 +58,37 @@ namespace DotnetBlueGreenEcsDeployments
                 ContainerInsights = true
             });
             
+           // var sourceArtifact = new CodePipeline.Artifact("sourceArtifact");
+           // var buildArtifact = new CodePipeline.Artifact("buildArtifact");
+    
+            // S3 bucket for storing the code pipeline artifacts
+            var artifactsBucket = new Bucket(this, "artifactsBucket", new BucketProps{
+                Encryption = BucketEncryption.S3_MANAGED,
+                BlockPublicAccess = BlockPublicAccess.BLOCK_ALL
+            });
+            
+            var denyUnEncryptedObjectUploads = new PolicyStatement(new PolicyStatementProps {
+                Effect = Effect.DENY,
+                Actions = new [] {"s3:PutObject"},
+                Principals = new [] { new AnyPrincipal() },
+                Resources = new [] { String.Concat( artifactsBucket.BucketArn, "/*") },
+                Conditions = new Dictionary<string, object> {
+                    { "StringNotEquals", new Dictionary<string, string> {{ "s3:x-amz-server-side-encryption", "aws:kms" }} }
+                }
+            });
+            
+            var denyInsecureConnections = new PolicyStatement(new PolicyStatementProps {
+                Effect = Effect.DENY,
+                Actions = new [] {"s3:*"},
+                Principals = new [] { new AnyPrincipal() },
+                Resources = new [] { String.Concat( artifactsBucket.BucketArn, "/*") },
+                Conditions = new Dictionary<string, object> {
+                    { "Bool", new Dictionary<string, string> {{ "aws:SecureTransport", "false" }} }
+                }
+            });
+            
+            artifactsBucket.AddToResourcePolicy(denyUnEncryptedObjectUploads);
+            artifactsBucket.AddToResourcePolicy(denyInsecureConnections);
             
         }
     }
