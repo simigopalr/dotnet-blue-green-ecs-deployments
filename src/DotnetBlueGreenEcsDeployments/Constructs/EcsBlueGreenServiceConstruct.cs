@@ -64,7 +64,7 @@ namespace DotnetBlueGreenEcsDeployments.Constructs
                 HealthCheck = new HealthCheck {
                     Path = "/",
                     Timeout = Duration.Seconds(30),
-                    Interval = Duration.Seconds(30),
+                    Interval = Duration.Seconds(60),
                     HealthyHttpCodes = "200"
                 }
             });
@@ -78,7 +78,7 @@ namespace DotnetBlueGreenEcsDeployments.Constructs
                 HealthCheck = new HealthCheck {
                     Path = "/",
                     Timeout = Duration.Seconds(30),
-                    Interval = Duration.Seconds(30),
+                    Interval = Duration.Seconds(60),
                     HealthyHttpCodes = "200"
                 }
             });
