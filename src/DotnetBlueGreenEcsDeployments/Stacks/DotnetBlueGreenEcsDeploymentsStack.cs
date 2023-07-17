@@ -24,10 +24,12 @@ namespace DotnetBlueGreenEcsDeployments.Stacks
             var codeBuildProject = Project.FromProjectName(this, "codeBuild", Fn.ImportValue("codeBuildProjectName"));
             var ecsTaskRole = Role.FromRoleArn(this, "ecsTaskRole", Fn.ImportValue("ecsTaskRoleArn"));
 
+            var apiName = "nginx-sample";
+
             var codePipelineRole = new Role(this, "codePipelineRole", new RoleProps {
                 AssumedBy = new ServicePrincipal("codepipeline.amazonaws.com")
             });
-            
+
             var codePipelinePolicy = new PolicyStatement(new PolicyStatementProps {
                 Effect = Effect.ALLOW,
                 Actions = new [] {
@@ -53,21 +55,21 @@ namespace DotnetBlueGreenEcsDeployments.Stacks
             codePipelineRole.AddToPolicy(codePipelinePolicy);
 
             var vpc = new Vpc(this, "ecsClusterVPC");
-            
+
             var cluster = new Cluster(this, "ecsCluster", new ClusterProps {
                 Vpc = vpc,
                 ContainerInsights = true
             });
-            
+
            // var sourceArtifact = new CodePipeline.Artifact("sourceArtifact");
            // var buildArtifact = new CodePipeline.Artifact("buildArtifact");
-    
+
             // S3 bucket for storing the code pipeline artifacts
             var artifactsBucket = new Bucket(this, "artifactsBucket", new BucketProps{
                 Encryption = BucketEncryption.S3_MANAGED,
                 BlockPublicAccess = BlockPublicAccess.BLOCK_ALL
             });
-            
+
             var denyUnEncryptedObjectUploads = new PolicyStatement(new PolicyStatementProps {
                 Effect = Effect.DENY,
                 Actions = new [] {"s3:PutObject"},
@@ -77,7 +79,7 @@ namespace DotnetBlueGreenEcsDeployments.Stacks
                     { "StringNotEquals", new Dictionary<string, string> {{ "s3:x-amz-server-side-encryption", "aws:kms" }} }
                 }
             });
-            
+
             var denyInsecureConnections = new PolicyStatement(new PolicyStatementProps {
                 Effect = Effect.DENY,
                 Actions = new [] {"s3:*"},
@@ -87,12 +89,12 @@ namespace DotnetBlueGreenEcsDeployments.Stacks
                     { "Bool", new Dictionary<string, string> {{ "aws:SecureTransport", "false" }} }
                 }
             });
-            
+
             artifactsBucket.AddToResourcePolicy(denyUnEncryptedObjectUploads);
             artifactsBucket.AddToResourcePolicy(denyInsecureConnections);
-            
-            var ecsBlueGreenService = new EcsBlueGreenServiceConstruct(this, "ecs-fargate-blue-green-service-construct");
-            
+
+            var ecsBlueGreenService = new EcsBlueGreenServiceConstruct(this, "ecs-fargate-blue-green-service-construct", apiName, ecsTaskRole, ecrRepo, vpc, cluster);
+
         }
     }
 }
