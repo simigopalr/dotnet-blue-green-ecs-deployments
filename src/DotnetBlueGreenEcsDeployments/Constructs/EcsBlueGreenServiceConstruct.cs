@@ -19,7 +19,8 @@ namespace DotnetBlueGreenEcsDeployments.Constructs
                 LogGroup = new LogGroup(this, "apiLogGroup", new LogGroupProps{
                     LogGroupName = String.Concat("/ecs/", apiName),
                     RemovalPolicy = RemovalPolicy.DESTROY
-                    })
+                    }),
+                StreamPrefix = "app"
            });
 
            // Creating the task definition
