@@ -1,4 +1,4 @@
-﻿using Amazon.CDK;
+using Amazon.CDK;
 ﻿using DotnetBlueGreenEcsDeployments.Stacks;
 
 namespace DotnetBlueGreenEcsDeployments
@@ -8,9 +8,8 @@ namespace DotnetBlueGreenEcsDeployments
         public static void Main(string[] args)
         {
             var app = new App();
-            new DotnetBlueGreenEcsDeploymentsStack(app, "DotnetBlueGreenEcsDeploymentsStack");
-            new DotnetContainerStack(app, "DotnetContainerStack");
-
+            new EcsDeployStack(app, "EcsDeployStack");
+            new ContainerStack(app, "ContainerStack");
             app.Synth();
         }
     }

@@ -14,9 +14,9 @@ using DotnetBlueGreenEcsDeployments.Constructs;
 
 namespace DotnetBlueGreenEcsDeployments.Stacks
 {
-    public class DotnetBlueGreenEcsDeploymentsStack : Stack
+    public class EcsDeployStack : Stack
     {
-        internal DotnetBlueGreenEcsDeploymentsStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
+        internal EcsDeployStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
         {
             //import the cfnoutputs from container stack and retrieve the relevant details
             var codeRepo = CodeCommit.Repository.FromRepositoryName(this, "codeRepo", Fn.ImportValue("repositoryName"));
@@ -27,6 +27,7 @@ namespace DotnetBlueGreenEcsDeployments.Stacks
             var apiName = "nginx-sample";
 
             var codePipelineRole = new Role(this, "codePipelineRole", new RoleProps {
+                RoleName = "pipelineRole",
                 AssumedBy = new ServicePrincipal("codepipeline.amazonaws.com")
             });
 
@@ -93,9 +94,9 @@ namespace DotnetBlueGreenEcsDeployments.Stacks
             artifactsBucket.AddToResourcePolicy(denyUnEncryptedObjectUploads);
             artifactsBucket.AddToResourcePolicy(denyInsecureConnections);
 
-            var ecsBlueGreenService = new EcsBlueGreenServiceConstruct(this, "ecs-fargate-blue-green-service-construct", apiName, ecsTaskRole, ecrRepo, vpc, cluster);
+            var ecsBlueGreenService = new EcsBlueGreenServiceConstruct(this, "service-construct", apiName, ecsTaskRole, ecrRepo, vpc, cluster);
 
-            var ecsBlueGreenPipeline = new EcsBlueGreenPipelineConstruct(this, "ecs-fargate-blue-green-pipeline-construct", ecsBlueGreenService, codePipelineRole, artifactsBucket, codeRepo, codeBuildProject);
+            var ecsBlueGreenPipeline = new EcsBlueGreenPipelineConstruct(this, "pipeline-construct", ecsBlueGreenService, codePipelineRole, artifactsBucket, codeRepo, codeBuildProject);
 
         }
     }

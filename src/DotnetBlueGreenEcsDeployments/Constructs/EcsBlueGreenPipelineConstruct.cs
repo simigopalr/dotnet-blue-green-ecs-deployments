@@ -39,9 +39,15 @@ namespace DotnetBlueGreenEcsDeployments.Constructs
                 Description = "Shifts x percentage of traffic every x minutes until all traffic is shifted",
             });
 
+            var ecsApplication = new EcsApplication(this, "ecs-application", new EcsApplicationProps {
+                ApplicationName = "ecsApplication"
+            });
 
+            
             var ecsBlueGreenDeploymentGroup = new EcsDeploymentGroup(this, "ecsDeploymentGroup", new EcsDeploymentGroupProps {
+                DeploymentGroupName = "ecsDeployGrp",
                 Service = ecsBlueGreenService.ecsService,
+                Application = ecsApplication,
                 BlueGreenDeploymentConfig = new EcsBlueGreenDeploymentConfig {
                     BlueTargetGroup = ecsBlueGreenService.blueTargetGroup,
                     GreenTargetGroup = ecsBlueGreenService.greenTargetGroup,
@@ -57,6 +63,7 @@ namespace DotnetBlueGreenEcsDeployments.Constructs
             // Code Pipeline - CloudWatch trigger event is created by CDK
             var pipeline = new Pipeline.Pipeline(this, "ecsBlueGreen", new Pipeline.PipelineProps {
                 Role = codePipelineRole,
+                PipelineName = "ecs-bg-deploy",
                 ArtifactBucket = artifactsBucket,
                 Stages = new [] {
                     new Pipeline.StageProps {

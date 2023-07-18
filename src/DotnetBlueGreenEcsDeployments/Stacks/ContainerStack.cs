@@ -8,9 +8,9 @@ using System.Collections.Generic;
 
 namespace DotnetBlueGreenEcsDeployments.Stacks
 {
-    public class DotnetContainerStack : Stack
+    public class ContainerStack : Stack
     {
-        internal DotnetContainerStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
+        internal ContainerStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
         {
             var ecsTaskRole = new Role(this, "ecsTaskRoleForWorkshop", new RoleProps {
                 AssumedBy = new ServicePrincipal("ecs-tasks.amazonaws.com")
