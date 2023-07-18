@@ -96,6 +96,18 @@ namespace DotnetBlueGreenEcsDeployments.Constructs
                     }
                 }
             });
+            pipeline.Node.AddDependency(ecsBlueGreenDeploymentGroup);
+
+            new CfnOutput(this, "ecsBlueGreenLBDns", new CfnOutputProps {
+                Description = "Load balancer DNS",
+                ExportName = "ecsBlueGreenLBDns",
+                Value = ecsBlueGreenService.alb.LoadBalancerDnsName
+            });
+            new CfnOutput(this, "blueGreenPipeline", new CfnOutputProps {
+                Description = "Blue Green Deployment Pipeline",
+                ExportName = "blueGreenPipeline",
+                Value = pipeline.PipelineName
+            });
         }
     }
 }
