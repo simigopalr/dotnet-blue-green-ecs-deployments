@@ -12,6 +12,12 @@ namespace DotnetBlueGreenEcsDeployments.Constructs
 {
     public class EcsBlueGreenServiceConstruct  : Construct
     {
+        public ECS.FargateService ecsService { get; }
+        public ApplicationListener albTestListener { get; }
+        public ApplicationListener albProdListener { get; }
+        public ApplicationLoadBalancer alb { get; }
+        public ApplicationTargetGroup greenTargetGroup { get; }
+        public ApplicationTargetGroup blueTargetGroup { get; }
         public EcsBlueGreenServiceConstruct(Construct scope, string id, string apiName, IRole ecsTaskRole, ECR.IRepository ecrRepo, IVpc vpc, ECS.ICluster cluster)
              : base(scope, id)
         {
@@ -42,21 +48,21 @@ namespace DotnetBlueGreenEcsDeployments.Constructs
             });
 
             // Creating an application load balancer, listener and two target groups for Blue/Green deployment
-            var alb = new ApplicationLoadBalancer(this, "alb", new ApplicationLoadBalancerProps{
+            alb = new ApplicationLoadBalancer(this, "alb", new ApplicationLoadBalancerProps{
                 Vpc = vpc,
                 InternetFacing = true
             });
-            var albProdListener = alb.AddListener("albProdListener", new ApplicationListenerProps{
+            albProdListener = alb.AddListener("albProdListener", new ApplicationListenerProps{
                 Port = 80
             });
-            var albTestListener = alb.AddListener("albTestListener", new ApplicationListenerProps{
+            albTestListener = alb.AddListener("albTestListener", new ApplicationListenerProps{
                 Port = 8080
             });
             albProdListener.Connections.AllowDefaultPortFromAnyIpv4("Allow traffic from everywhere");
             albTestListener.Connections.AllowDefaultPortFromAnyIpv4("Allow traffic from everywhere");
 
             // Target group 1
-            var blueTargetGroup = new ApplicationTargetGroup(this, "blueGroup", new ApplicationTargetGroupProps{
+            blueTargetGroup = new ApplicationTargetGroup(this, "blueGroup", new ApplicationTargetGroupProps{
                 Vpc = vpc,
                 Protocol = ApplicationProtocol.HTTP,
                 Port = 80,
@@ -70,7 +76,7 @@ namespace DotnetBlueGreenEcsDeployments.Constructs
             });
 
             // Target group 2
-            var greenTargetGroup = new ApplicationTargetGroup(this, "greenGroup", new ApplicationTargetGroupProps{
+            greenTargetGroup = new ApplicationTargetGroup(this, "greenGroup", new ApplicationTargetGroupProps{
                 Vpc = vpc,
                 Protocol = ApplicationProtocol.HTTP,
                 Port = 80,
@@ -95,7 +101,7 @@ namespace DotnetBlueGreenEcsDeployments.Constructs
                 }
             });
 
-            var ecsService = new ECS.FargateService(this, "ecsService", new ECS.FargateServiceProps {
+            ecsService = new ECS.FargateService(this, "ecsService", new ECS.FargateServiceProps {
                 Cluster = cluster,
                 TaskDefinition = taskDefinition,
                 HealthCheckGracePeriod = Duration.Seconds(60),

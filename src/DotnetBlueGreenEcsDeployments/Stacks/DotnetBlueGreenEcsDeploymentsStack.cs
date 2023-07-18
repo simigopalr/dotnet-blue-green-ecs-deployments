@@ -95,6 +95,8 @@ namespace DotnetBlueGreenEcsDeployments.Stacks
 
             var ecsBlueGreenService = new EcsBlueGreenServiceConstruct(this, "ecs-fargate-blue-green-service-construct", apiName, ecsTaskRole, ecrRepo, vpc, cluster);
 
+            var ecsBlueGreenPipeline = new EcsBlueGreenPipelineConstruct(this, "ecs-fargate-blue-green-pipeline-construct", ecsBlueGreenService, codePipelineRole, artifactsBucket, codeRepo, codeBuildProject);
+
         }
     }
 }
