@@ -1,7 +1,6 @@
 # Welcome to your CDK C# project!
 
-You should explore the contents of this project. It demonstrates a CDK app with an instance of a stack (`DotnetBlueGreenEcsDeploymentsStack`)
-which contains stacks for ECS blue green deployment.
+You should explore the contents of this project. It demonstrates a CDK app which contains stacks for ECS blue green deployment.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
