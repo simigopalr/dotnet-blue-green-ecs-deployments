@@ -7,6 +7,9 @@ using Amazon.CDK.AWS.IAM;
 using ECR = Amazon.CDK.AWS.ECR;
 using Constructs;
 using System;
+using Amazon.CDK.AWS.ApplicationAutoScaling;
+using Amazon.CDK.AWS.CloudWatch;
+using System.Collections.Generic;
 
 namespace DotnetBlueGreenEcsDeployments.Constructs
 {
@@ -115,6 +118,59 @@ namespace DotnetBlueGreenEcsDeployments.Constructs
             ecsService.Connections.AllowFrom(alb, Port.Tcp(80));
             ecsService.Connections.AllowFrom(alb, Port.Tcp(8080));
             ecsService.AttachToApplicationTargetGroup(blueTargetGroup);
+            
+           var scalableTarget = new ScalableTarget(this, "scalableTarget", new ScalableTargetProps
+            {
+                ServiceNamespace = ServiceNamespace.ECS,
+                ResourceId = String.Concat("service/", cluster.ClusterName, "/", ecsService.ServiceName),
+                ScalableDimension = "ecs:service:DesiredCount",
+                MinCapacity = 1,
+                MaxCapacity = 10,                
+            });
+
+ 
+
+            var scalingPolicy = new StepScalingPolicy(this, "scalingpolicy", new StepScalingPolicyProps
+            {
+                ScalingTarget = scalableTarget,
+                MetricAggregationType = MetricAggregationType.AVERAGE,
+                AdjustmentType = AdjustmentType.CHANGE_IN_CAPACITY,
+                ScalingSteps = new []
+                {
+                    new ScalingInterval
+                    {
+                        Change = -1,
+                        Lower = 0,
+                        Upper = 10
+                    },
+                    new ScalingInterval
+                    {
+                        Change = 1,
+                        Lower = 50,
+                        Upper = 70
+                    },
+                    new ScalingInterval
+                    {
+                        Change = 3,
+                        Lower = 70,
+                        Upper = null
+                    }
+                },
+                Cooldown = Duration.Minutes(1),
+                Metric = new Metric(new MetricProps
+                {
+                    Namespace = "AWS/ECS",
+                    MetricName = "CPUUtlization",
+                    Unit = Unit.PERCENT,                    
+                    Period = Duration.Minutes(1),   
+                    Statistic = "Minimum",
+                    DimensionsMap = new Dictionary<string, string>
+                    {
+                        { "ClusterName", cluster.ClusterName},
+                        { "ServiceName", ecsService.ServiceName }
+                    }
+                })
+            }); 
         }
 
     }
